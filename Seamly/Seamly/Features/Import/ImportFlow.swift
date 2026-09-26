@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 import PhotosUI
 import CoreGraphics
 import ImageIO
@@ -34,6 +35,10 @@ nonisolated final class ImportFlow: ObservableObject {
     /// The model finished — or the shell says the work is over.
     func finish() { running = false }
 
+    /// `@MainActor` explicitly, because the type itself is `nonisolated` (for the reason above)
+    /// and this method touches the published flag — the build catches it as "call to main
+    /// actor-isolated instance method in a synchronous nonisolated context" otherwise.
+    @MainActor
     func noteFailure(_ message: String, into model: CaptureModel) {
         model.setImportError(message)
         running = false
