@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 /// Every capture. Compact is a ruled list; regular is a grid of uniform 3:5 cells. The dock
 /// stays, because the capture affordance is permanently present.
@@ -7,8 +8,9 @@ struct LibraryScreen: View {
     var liveCapture: LiveCaptureAvailability = .available
     var onOpen: (UUID) -> Void
     var onBack: () -> Void
-    var onVideo: () -> Void
-    var onPhotos: () -> Void
+    /// Same two pickers as Home's dock, and the same shell-owned state behind them.
+    @Binding var videoSelection: PhotosPickerItem?
+    @Binding var photoSelection: [PhotosPickerItem]
     var onDiagnostics: () -> Void
 
     @Environment(\.horizontalSizeClass) private var hSize
@@ -19,8 +21,8 @@ struct LibraryScreen: View {
     var body: some View {
         VStack(spacing: 0) {
             NavBar(
-                title: "Library",
-                subtitle: SeamlyNumber.counted(model.captures.count, "capture", "captures"),
+                title: "图库",
+                subtitle: SeamlyNumber.counted(model.captures.count, "张截图", "张截图"),
                 large: true,
                 onBack: onBack
             ) {
@@ -30,21 +32,21 @@ struct LibraryScreen: View {
                 // device — but it lives behind an overflow, on the screen that already holds
                 // everything else.
                 Menu {
-                    Button("Diagnostics", systemImage: "stethoscope", action: onDiagnostics)
+                    Button("诊断日志", systemImage: "stethoscope", action: onDiagnostics)
                 } label: {
                     Image(systemName: "ellipsis.circle")
                         .font(.system(size: 20))
                         .foregroundStyle(SeamlyColor.inkMuted)
                         .seamlyHitTarget()
                 }
-                .accessibilityLabel("More")
+                .accessibilityLabel("更多")
             }
 
             if model.captures.isEmpty {
                 EmptyState(
                     symbol: "tray",
-                    title: "No captures yet",
-                    message: "Anything you record or import shows up here."
+                    title: "还没有截图",
+                    message: "你录制或导入的内容都会出现在这里。"
                 )
                 .frame(maxHeight: .infinity)
             } else if layout.isRegular {
@@ -53,9 +55,13 @@ struct LibraryScreen: View {
                 list
             }
 
-            CaptureDock(liveCapture: liveCapture, onVideo: onVideo, onPhotos: onPhotos)
-                .padding(.horizontal, layout.gutter)
-                .padding(.top, SeamlySpace.s5)
+            CaptureDock(
+                liveCapture: liveCapture,
+                videoSelection: $videoSelection,
+                photoSelection: $photoSelection
+            )
+            .padding(.horizontal, layout.gutter)
+            .padding(.top, SeamlySpace.s5)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(SeamlyColor.paper)
@@ -73,20 +79,9 @@ struct LibraryScreen: View {
                 .listRowSeparator(.hidden)
                 .listRowBackground(SeamlyColor.paper)
             }
-            Section {
-                ImportRow(symbol: "film", title: "From Video",
-                          detail: "Stitch an existing screen recording", action: onVideo)
-                ImportRow(symbol: "photo.on.rectangle", title: "From Photos",
-                          detail: "Pick overlapping screenshots", action: onPhotos)
-            } header: {
-                Text("Or start from something you already have".uppercased())
-                    .font(SeamlyFont.caps)
-                    .seamlyCapsTracking()
-                    .foregroundStyle(SeamlyColor.inkFaint)
-            }
-            .listRowInsets(EdgeInsets(top: 0, leading: layout.gutter, bottom: 0, trailing: layout.gutter))
-            .listRowSeparator(.hidden)
-            .listRowBackground(SeamlyColor.paper)
+            // The two import rows used to be repeated here. They are gone because the dock
+            // BELOW already carries both — and now each one opens its picker directly, so the
+            // list was offering the same two taps twice on one screen.
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)

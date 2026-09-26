@@ -59,7 +59,7 @@ struct CaptureFindingsTests {
         let f = try #require(all.first)
         #expect(f.kind == .seam)
         #expect(f.target == .join(1))
-        #expect(f.question == "Does this line up?")
+        #expect(f.question == "这两半对得上吗？")
         #expect(f.dy == 180)
         #expect(f.confidence == 0.2)
     }
@@ -79,7 +79,7 @@ struct CaptureFindingsTests {
         #expect(all.count == 1)
         let f = try #require(all.first)
         #expect(f.kind == .bars)
-        #expect(f.question == "Where do the bars end?")
+        #expect(f.question == "栏到哪里结束？")
         guard case .chrome(let keyframeID, let edges) = f.target else {
             Issue.record("expected a chrome target, got \(f.target)")
             return
@@ -137,12 +137,12 @@ struct CaptureFindingsTests {
             findings: findings(s)
         )
         let gap = try #require(marks.first { $0.kind == .gap })
-        #expect(gap.lostLabel == "lost lock")
+        #expect(gap.lostLabel == "丢失跟焦")
     }
 
     @Test func frameNumbersReadOneBased() throws {
         let all = findings(session(count: 4, breaksAfter: [1]))
-        #expect(try #require(all.first).title == "Gap after frame 2")
+        #expect(try #require(all.first).title == "第 2 帧后面有缺口")
     }
 
     // MARK: - Marks

@@ -90,8 +90,8 @@ struct PositionScale: View {
                 )
         }
         .accessibilityElement()
-        .accessibilityLabel("Position in capture")
-        .accessibilityValue("\(Int((viewportTopPct * 100).rounded())) percent of \(SeamlyNumber.px(heightPx))")
+        .accessibilityLabel("在长图中的位置")
+        .accessibilityValue("已到 \(SeamlyNumber.px(heightPx)) 的 \(Int((viewportTopPct * 100).rounded()))%")
     }
 
     private func scrub(along: CGFloat) -> some Gesture {

@@ -50,10 +50,10 @@ struct RepairQueueView: View {
     var body: some View {
         VStack(spacing: 0) {
             NavBar(
-                title: "Repair",
-                subtitle: "\(queue.answeredCount) of \(queue.findings.count) answered"
+                title: "修复",
+                subtitle: "已答 \(queue.answeredCount) / \(queue.findings.count)"
             ) {
-                IconButton(symbol: "xmark", label: "Close") {
+                IconButton(symbol: "xmark", label: "关闭") {
                     Task { if await queue.commit() { onClose() } }
                 }
             }
@@ -64,11 +64,11 @@ struct RepairQueueView: View {
             } else {
                 EmptyState(
                     symbol: "checkmark.seal",
-                    title: "Nothing to fix",
-                    message: "Every seam matched confidently."
+                    title: "没有需要修的",
+                    message: "每一处拼接都对齐得很好。"
                 )
                 .frame(maxHeight: .infinity)
-                SeamlyButton("Close", action: onClose)
+                SeamlyButton("关闭", action: onClose)
                     .padding(SeamlySpace.gutterCompact)
             }
         }
@@ -81,13 +81,13 @@ struct RepairQueueView: View {
             await queue.load()
         }
         .alert(
-            "Couldn't save",
+            "保存失败",
             isPresented: Binding(
                 get: { queue.saveError != nil },
                 set: { if !$0 { queue.clearSaveError() } }
             )
         ) {
-            Button("OK", role: .cancel) {}
+            Button("好", role: .cancel) {}
         } message: {
             Text(queue.saveError ?? "")
         }
@@ -103,7 +103,7 @@ struct RepairQueueView: View {
     private func stage(_ finding: Finding) -> some View {
         Group {
             if let message = queue.loadError {
-                EmptyState(symbol: "exclamationmark.triangle", title: "Can't show this", message: message)
+                EmptyState(symbol: "exclamationmark.triangle", title: "显示不出来", message: message)
             } else if finding.kind == .seam {
                 if let frames = queue.frames, let alignment = queue.alignment {
                     CaptureView(
@@ -145,8 +145,8 @@ struct RepairQueueView: View {
             } else {
                 EmptyState(
                     symbol: "photo.badge.exclamationmark",
-                    title: "Can't show this",
-                    message: "This capture is no longer on the device."
+                    title: "显示不出来",
+                    message: "这张截图在本机已经找不到了。"
                 )
             }
         }
@@ -195,11 +195,11 @@ struct RepairQueueView: View {
 
     private func affirmative(_ finding: Finding) -> String {
         switch finding.kind {
-        case .seam: "Looks right"
+        case .seam: "没问题"
         // Once the user has said what the bars ARE, "No bars here" is the wrong sentence on the
         // button that accepts it — and the wrong instruction to the model behind it.
-        case .bars: queue.hasEditedChrome(for: finding) ? "Looks right" : "No bars here"
-        case .gap: "Got it"
+        case .bars: queue.hasEditedChrome(for: finding) ? "没问题" : "这里没有栏"
+        case .gap: "知道了"
         }
     }
 
@@ -216,7 +216,7 @@ struct RepairQueueView: View {
         if finding.kind == .gap {
             EmptyView()
         } else if !showManual {
-            Button("Adjust manually") { showManual = true }
+            Button("手动微调") { showManual = true }
                 .font(SeamlyFont.footnote)
                 .foregroundStyle(SeamlyColor.accent)
                 .buttonStyle(.plain)
@@ -227,11 +227,11 @@ struct RepairQueueView: View {
                 case .seam:
                     if let alignment = queue.alignment {
                         StepperRow(
-                            label: "Offset",
+                            label: "偏移量",
                             value: alignment.dy,
                             step: 1,
                             range: alignment.dyRange,
-                            hint: "Source pixels between the two halves"
+                            hint: "两半之间的原始像素差"
                         ) { queue.setDy($0) }
                     }
                 case .bars:
@@ -242,20 +242,20 @@ struct RepairQueueView: View {
                     let edges = uncertainEdges(of: finding)
                     if edges.contains(.top) {
                         StepperRow(
-                            label: "Top bar",
+                            label: "顶栏",
                             value: queue.chromeValue(.top, for: finding),
                             step: 5,
                             range: queue.chromeRange(.top, for: finding),
-                            hint: "Repeated chrome cropped from this frame"
+                            hint: "从这一帧裁掉的重复栏高度"
                         ) { queue.setChrome($0, edge: .top, for: finding) }
                     }
                     if edges.contains(.bottom) {
                         StepperRow(
-                            label: "Bottom bar",
+                            label: "底栏",
                             value: queue.chromeValue(.bottom, for: finding),
                             step: 5,
                             range: queue.chromeRange(.bottom, for: finding),
-                            hint: edges.contains(.top) ? nil : "Repeated chrome cropped from this frame"
+                            hint: nil
                         ) { queue.setChrome($0, edge: .bottom, for: finding) }
                     }
                 case .gap:
@@ -289,7 +289,7 @@ struct RepairQueueView: View {
             }
             .ignoresSafeArea()
             .accessibilityIdentifier("repair-saving")
-            .accessibilityLabel("Saving")
+            .accessibilityLabel("正在保存")
         }
     }
 }

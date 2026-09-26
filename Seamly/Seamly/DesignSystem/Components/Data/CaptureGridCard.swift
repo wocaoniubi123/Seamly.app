@@ -31,7 +31,7 @@ struct CaptureGridCard: View {
         .buttonStyle(.plain)
         .accessibilityIdentifier("library-card")
         .contextMenu {
-            Button("Delete", systemImage: "trash", role: .destructive, action: onDelete)
+            Button("删除", systemImage: "trash", role: .destructive, action: onDelete)
         }
     }
 }

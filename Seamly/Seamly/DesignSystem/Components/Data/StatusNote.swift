@@ -14,14 +14,14 @@ struct StatusNote: View {
 
     private var word: String {
         switch kind {
-        case .ready: "Ready"
-        case .processing: "Stitching…"
-        case .flagged: "flagged"
-        case .gap: "gap"
-        case .bars: "bars uncertain"
-        case .incomplete: "Incomplete"
-        case .orderAssumed: "Order assumed"
-        case .failed: "Couldn't stitch"
+        case .ready: "就绪"
+        case .processing: "正在拼接…"
+        case .flagged: "处待确认"
+        case .gap: "处缺口"
+        case .bars: "处栏范围待定"
+        case .incomplete: "未录完"
+        case .orderAssumed: "顺序沿用"
+        case .failed: "拼接失败"
         }
     }
 
@@ -60,7 +60,8 @@ struct StatusNote: View {
 
     private var text: String {
         if let label { return label }
-        if let count { return "\(count) \(word)" }
+        // 中文里"数量"和"量词"之间不加空格；`word` 本身就是量词短语。
+        if let count { return "\(count)\(word)" }
         return word
     }
 

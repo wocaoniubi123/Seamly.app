@@ -6,7 +6,7 @@ import StitchKit
 /// both `SampleHandler` (category `capture`) and `CaptureModel` (category `app`) write to.
 struct DiagnosticsView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var text = "(loading…)"
+    @State private var text = "（加载中…）"
     @State private var clearError: String?
 
     var body: some View {
@@ -18,26 +18,26 @@ struct DiagnosticsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
             }
-            .navigationTitle("Diagnostics")
+            .navigationTitle("诊断日志")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Done") { dismiss() }
+                    Button("完成") { dismiss() }
                 }
                 ToolbarItem(placement: .primaryAction) {
                     ShareLink(item: text) { Image(systemName: "square.and.arrow.up") }
                 }
                 ToolbarItemGroup(placement: .bottomBar) {
-                    Button("Copy", systemImage: "doc.on.doc") { UIPasteboard.general.string = text }
+                    Button("拷贝", systemImage: "doc.on.doc") { UIPasteboard.general.string = text }
                     Spacer()
-                    Button("Reload", systemImage: "arrow.clockwise") { load() }
+                    Button("刷新", systemImage: "arrow.clockwise") { load() }
                     Spacer()
-                    Button("Clear", systemImage: "trash", role: .destructive) { clear() }
+                    Button("清空", systemImage: "trash", role: .destructive) { clear() }
                 }
             }
             .task { load() }
-            .alert("Couldn't clear log", isPresented: .constant(clearError != nil)) {
-                Button("OK") { clearError = nil }
+            .alert("没能清空日志", isPresented: .constant(clearError != nil)) {
+                Button("好") { clearError = nil }
             } message: {
                 Text(clearError ?? "")
             }
@@ -46,7 +46,7 @@ struct DiagnosticsView: View {
 
     private func load() {
         guard let container = AppGroup.containerURL else {
-            text = "App Group unavailable — diagnostics can't be read on this build."
+            text = "这个版本拿不到 App Group，读不了诊断日志。"
             return
         }
         text = Diagnostics.readAll(containerURL: container)

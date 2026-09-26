@@ -37,7 +37,7 @@ struct CaptureListRow: View {
             Rectangle().fill(SeamlyColor.ruleFaint).frame(height: 1)
         }
         .swipeActions(edge: .trailing) {
-            Button("Delete", systemImage: "trash", role: .destructive, action: onDelete)
+            Button("删除", systemImage: "trash", role: .destructive, action: onDelete)
         }
     }
 }

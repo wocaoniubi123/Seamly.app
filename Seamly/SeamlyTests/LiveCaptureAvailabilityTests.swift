@@ -28,7 +28,7 @@ struct LiveCaptureAvailabilityTests {
         #expect(availability == .unavailableOnMac)
         #expect(!availability.isAvailable)
         let explanation = try #require(availability.explanation)
-        #expect(explanation.contains("iPhone or iPad"))
+        #expect(explanation.contains("iPhone 或 iPad"))
     }
 
     /// Screen Time restrictions, an MDM profile, AirPlay mirroring or another recorder all make
@@ -41,7 +41,7 @@ struct LiveCaptureAvailabilityTests {
         #expect(availability == .recorderUnavailable)
         #expect(!availability.isAvailable)
         let explanation = try #require(availability.explanation)
-        #expect(explanation.contains("right now"))
+        #expect(explanation.contains("现在用不了"))
     }
 
     /// The simulator has no recording service, so the recorder is always unavailable there. If
@@ -59,7 +59,7 @@ struct LiveCaptureAvailabilityTests {
         let unavailable: [LiveCaptureAvailability] = [.unavailableOnMac, .recorderUnavailable]
         for availability in unavailable {
             let explanation = try #require(availability.explanation)
-            let namesAlternatives = explanation.contains("screen recording or screenshots")
+            let namesAlternatives = explanation.contains("导入录屏或导入截图")
             #expect(namesAlternatives, "\(availability): \(explanation)")
         }
     }

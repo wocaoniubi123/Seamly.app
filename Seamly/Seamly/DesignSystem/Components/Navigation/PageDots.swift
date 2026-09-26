@@ -14,6 +14,6 @@ struct PageDots: View {
             }
         }
         .accessibilityElement()
-        .accessibilityLabel("Page \(index + 1) of \(count)")
+        .accessibilityLabel("第 \(index + 1) 页，共 \(count) 页")
     }
 }

@@ -27,10 +27,10 @@ struct ExportSheet: View {
     private var capture: Capture? { model.captures.first { $0.id == captureID } }
 
     var body: some View {
-        SheetChrome(title: "Export") {
+        SheetChrome(title: "导出") {
             EmptyView()
         } trailing: {
-            SeamlyButton("Done", variant: .plain, size: .small, action: onClose)
+            SeamlyButton("完成", variant: .plain, size: .small, action: onClose)
         } content: {
             VStack(alignment: .leading, spacing: 0) {
                 if let capture {
@@ -41,7 +41,7 @@ struct ExportSheet: View {
                         ))
                         .monospacedDigit()
                         if !capture.findings.isEmpty {
-                            Text("· \(capture.findings.count) unanswered").monospacedDigit()
+                            Text("· \(capture.findings.count) 处待确认").monospacedDigit()
                         }
                     }
                     .font(SeamlyFont.mono)
@@ -49,16 +49,16 @@ struct ExportSheet: View {
                     .padding(.bottom, SeamlySpace.s5)
                 }
 
-                caps("Image")
-                ImportRow(symbol: "photo", title: "Save to Photos",
-                          detail: "Full resolution PNG", action: saveToPhotos)
-                ImportRow(symbol: "square.and.arrow.up", title: "Share PNG",
-                          detail: "Composited on demand", action: sharePNG)
-                ImportRow(symbol: "doc.on.doc", title: "Copy to Clipboard", action: copy)
+                caps("图片")
+                ImportRow(symbol: "photo", title: "保存到相册",
+                          detail: "全分辨率 PNG", action: saveToPhotos)
+                ImportRow(symbol: "square.and.arrow.up", title: "分享 PNG",
+                          detail: "需要时即时合成", action: sharePNG)
+                ImportRow(symbol: "doc.on.doc", title: "拷贝到剪贴板", action: copy)
 
-                caps("Document").padding(.top, SeamlySpace.s7)
-                ImportRow(symbol: "doc.richtext", title: "Export PDF",
-                          detail: "Paginated for very long captures", action: sharePDF)
+                caps("文档").padding(.top, SeamlySpace.s7)
+                ImportRow(symbol: "doc.richtext", title: "导出 PDF",
+                          detail: "超长图会自动分页", action: sharePDF)
 
                 if busy {
                     ProgressView()
@@ -74,10 +74,10 @@ struct ExportSheet: View {
             ShareSheet(url: item.url)
         }
         .alert(
-            "Export",
+            "导出",
             isPresented: Binding(get: { status != nil }, set: { if !$0 { status = nil } })
         ) {
-            Button("OK", role: .cancel) {}
+            Button("好", role: .cancel) {}
         } message: {
             Text(status ?? "")
         }
@@ -98,7 +98,7 @@ struct ExportSheet: View {
         run {
             let image = try await model.fullComposite(captureID)
             try await Exporter.saveToPhotos(image)
-            status = "Saved to Photos."
+            status = "已保存到相册。"
         }
     }
 
@@ -117,7 +117,7 @@ struct ExportSheet: View {
         run {
             let image = try await model.fullComposite(captureID)
             Exporter.copyToPasteboard(image)
-            status = "Copied."
+            status = "已拷贝。"
         }
     }
 

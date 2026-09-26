@@ -98,9 +98,9 @@ nonisolated enum CaptureFindings {
                 kind: .gap,
                 atPct: Double(destY) / height,
                 target: .gap(afterKeyframeIndex: span.afterKeyframeIndex),
-                title: "Gap after frame \(span.afterKeyframeIndex + 1)",
-                question: "Nothing was captured here",
-                detail: "You scrolled past this stretch too fast — recording that part again is the only way to get it.",
+                title: "第 \(span.afterKeyframeIndex + 1) 帧后面有缺口",
+                question: "这一小段没有截到",
+                detail: "这里滑得太快，直接跳过去了——只能重新录这一段才能补回来。",
                 dy: nil,
                 confidence: nil
             ))
@@ -116,9 +116,9 @@ nonisolated enum CaptureFindings {
                 kind: .bars,
                 atPct: Double(span.destY) / height,
                 target: .chrome(keyframeID: keyframe.id, edges: edges),
-                title: "Bars uncertain — frame \(keyframe.index + 1)",
-                question: "Where do the bars end?",
-                detail: "Bars weren't detected confidently here — set the crop.",
+                title: "顶/底栏不确定 — 第 \(keyframe.index + 1) 帧",
+                question: "栏到哪里结束？",
+                detail: "这一屏没能认准顶栏/底栏的位置——手动设一下裁切。",
                 dy: nil,
                 confidence: nil
             ))
@@ -134,9 +134,9 @@ nonisolated enum CaptureFindings {
                 kind: .seam,
                 atPct: Double(destY) / height,
                 target: .join(seam.fromIndex),
-                title: "Seam after frame \(seam.fromIndex + 1)",
-                question: "Does this line up?",
-                detail: "Drag the lower half until the two halves meet.",
+                title: "第 \(seam.fromIndex + 1) 帧后面的拼接处",
+                question: "这两半对得上吗？",
+                detail: "拖动下半部分，直到两半接上。",
                 dy: seam.provisionalDy,
                 confidence: seam.confidence
             ))
@@ -187,7 +187,7 @@ nonisolated enum CaptureMarks {
                 n: byTarget[.gap(afterKeyframeIndex: span.afterKeyframeIndex)]?.n,
                 // The engine cannot know how much was never revealed — that is what a break
                 // is. Naming a pixel count here would be inventing a number.
-                lostLabel: "lost lock"
+                lostLabel: "丢失跟焦"
             ))
         }
 

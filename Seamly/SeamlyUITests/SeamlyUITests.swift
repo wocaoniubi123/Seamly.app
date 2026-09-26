@@ -56,7 +56,7 @@ final class SeamlyUITests: XCTestCase {
         // Home is *behind* the onboarding sheet, so its elements exist even while the sheet is
         // covering them — these assertions are only worth something because they also check the
         // elements can be reached.
-        let headline = app.staticTexts["Nothing captured yet"]
+        let headline = app.staticTexts["还没有截过图"]
         XCTAssertTrue(headline.waitForExistence(timeout: 5))
         XCTAssertTrue(headline.isHittable, "home is covered — onboarding was not dismissed")
 
@@ -67,8 +67,8 @@ final class SeamlyUITests: XCTestCase {
         // `.buttons`, the same fix `RepairUITests` already needed for this exact class of problem.
         let record = app.descendants(matching: .any).matching(identifier: "record-button").firstMatch
         XCTAssertTrue(record.isHittable, "the dock's hero is missing")
-        XCTAssertTrue(app.buttons["From a screen recording"].isHittable)
-        XCTAssertTrue(app.buttons["From screenshots"].isHittable)
+        XCTAssertTrue(app.buttons["导入录屏"].isHittable)
+        XCTAssertTrue(app.buttons["导入截图"].isHittable)
     }
 
     /// On a device where ReplayKit broadcast cannot work, the dock must SAY so in the hero's
@@ -89,7 +89,7 @@ final class SeamlyUITests: XCTestCase {
         XCTAssertTrue(explanation.waitForExistence(timeout: 5), "the dock did not explain itself")
         XCTAssertTrue(explanation.isHittable, "the explanation is covered")
         XCTAssertTrue(
-            explanation.label.contains("screen recording or screenshots"),
+            explanation.label.contains("导入录屏或导入截图"),
             "the explanation must point at the two paths that still work: \(explanation.label)"
         )
 
@@ -97,8 +97,8 @@ final class SeamlyUITests: XCTestCase {
         XCTAssertFalse(record.firstMatch.exists, "a Record button that cannot work is still on screen")
 
         // The alternatives it names are the buttons either side of it, and they must still work.
-        XCTAssertTrue(app.buttons["From a screen recording"].isHittable)
-        XCTAssertTrue(app.buttons["From screenshots"].isHittable)
+        XCTAssertTrue(app.buttons["导入录屏"].isHittable)
+        XCTAssertTrue(app.buttons["导入截图"].isHittable)
     }
 
     /// Library is reachable from Home and lists the capture Home is showing.
@@ -109,7 +109,7 @@ final class SeamlyUITests: XCTestCase {
         app.launch()
         dismissOnboardingIfPresented(app)
 
-        let library = app.buttons["Library"]
+        let library = app.buttons["图库"]
         XCTAssertTrue(library.waitForExistence(timeout: 30), "Home never offered Library")
         library.tap()
 
@@ -124,14 +124,14 @@ final class SeamlyUITests: XCTestCase {
         XCTAssertTrue(record.isHittable, "the dock must stay on Library")
     }
 
-    /// First launch presents onboarding as a sheet over home. Its button reads "Next" on every
-    /// page but the last, where it becomes "Get Started" — so reaching home means paging all the
+    /// First launch presents onboarding as a sheet over home. Its button reads "下一步" on every
+    /// page but the last, where it becomes "开始使用" — so reaching home means paging all the
     /// way through. Later launches on the same install skip onboarding entirely
     /// (`hasSeenOnboarding` persists), which is why every step here is conditional.
     @MainActor
     private func dismissOnboardingIfPresented(_ app: XCUIApplication) {
-        let next = app.buttons["Next"]
-        let getStarted = app.buttons["Get Started"]
+        let next = app.buttons["下一步"]
+        let getStarted = app.buttons["开始使用"]
         guard next.waitForExistence(timeout: 5) || getStarted.exists else { return }
         while next.exists { next.tap() }
         XCTAssertTrue(getStarted.waitForExistence(timeout: 5), "onboarding never offered a way out")

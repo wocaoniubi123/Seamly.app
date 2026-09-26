@@ -19,7 +19,7 @@ struct CaptureConditionTests {
         #expect(primary.kind == .gaps)
         #expect(all.count == 1)
         // 2 breaks == 3 pieces.
-        #expect(primary.headline == "Joined from 3 pieces")
+        #expect(primary.headline == "由 3 段拼成")
     }
 
     @Test func aSingleFlaggedSeamReadsAsSingular() throws {
@@ -28,7 +28,7 @@ struct CaptureConditionTests {
             Issue.record("expected imperfect, got \(condition)"); return
         }
         #expect(primary.kind == .flaggedJoins)
-        #expect(primary.detail == "1 join might be slightly off.")
+        #expect(primary.detail == "有 1 处可能偏了一点。")
     }
 
     @Test func severalFlaggedSeamsReadAsPlural() throws {
@@ -36,7 +36,7 @@ struct CaptureConditionTests {
         guard case .imperfect(let primary, _) = condition else {
             Issue.record("expected imperfect, got \(condition)"); return
         }
-        #expect(primary.detail == "3 joins might be slightly off.")
+        #expect(primary.detail == "有 3 处可能偏了一点。")
     }
 
     /// Ranking is the whole point of `primary`: the user sees one line, so it must be the
@@ -80,7 +80,7 @@ struct CaptureConditionTests {
         for imperfection in all {
             let text = imperfection.headline + " " + imperfection.detail
             for word in Self.bannedVocabulary {
-                #expect(!text.lowercased().contains(word), "\(imperfection.kind) leaks \"\(word)\": \(text)")
+                #expect(!text.contains(word), "\(imperfection.kind) leaks \"\(word)\": \(text)")
             }
         }
     }
@@ -145,8 +145,11 @@ struct CaptureConditionTests {
     /// conformance, so `localizedDescription` bridges it to "The operation couldn't be
     /// completed. (StitchKit.Compositor.CompositorError error 1.)" — which is what a user saw
     /// on the screen a failed capture navigates to *automatically*. Every known case must read
-    /// as a sentence, and none of them may leak a type name or pipeline vocabulary.
-    @Test func knownPipelineErrorsReadAsPlainEnglish() {
+    /// as a sentence, and none of them may leak a type name, a module name, or pipeline
+    /// vocabulary. The UI is Chinese, so the vocabulary check now asks that no English
+    /// pipeline word survives at all — a stray English term would be the same failure the
+    /// original ban was written for.
+    @Test func knownPipelineErrorsReadAsPlainChinese() {
         let errors: [Error] = [
             Compositor.CompositorError.noKeyframes,
             Compositor.CompositorError.contextFailure,
@@ -166,7 +169,7 @@ struct CaptureConditionTests {
             #expect(!message.contains("StitchKit"), "\(error) leaks a module name: \(message)")
             #expect(!message.contains("Error"), "\(error) leaks a type name: \(message)")
             for word in Self.bannedVocabulary {
-                #expect(!message.lowercased().contains(word), "\(error) leaks \"\(word)\": \(message)")
+                #expect(!message.contains(word), "\(error) leaks \"\(word)\": \(message)")
             }
         }
     }
@@ -178,7 +181,7 @@ struct CaptureConditionTests {
         let message = CaptureCondition.message(for: Unforeseen.somethingNew)
         #expect(!message.contains("Unforeseen"))
         #expect(!message.contains("error 0"))
-        #expect(message == "Something went wrong and this couldn't be finished.")
+        #expect(message == "出了点问题，这一步没能完成。")
     }
 
     /// …but an error that *does* carry a real sentence keeps it. Throwing away a specific,
@@ -186,7 +189,7 @@ struct CaptureConditionTests {
     /// one would be its own regression.
     @Test func anErrorWithARealMessageKeepsIt() {
         let localized = CaptureModel.CaptureError.notFound
-        #expect(CaptureCondition.message(for: localized) == "That capture is no longer available.")
+        #expect(CaptureCondition.message(for: localized) == "这次截图在本机已经找不到了。")
 
         let cocoa = NSError(
             domain: NSCocoaErrorDomain,

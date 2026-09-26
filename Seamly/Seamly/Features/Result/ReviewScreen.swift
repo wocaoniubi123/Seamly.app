@@ -38,11 +38,11 @@ struct ReviewScreen: View {
                 // Deleted out from under this screen, or still stitching. Either way there is
                 // nothing to review; Home is where the state of a capture is reported.
                 VStack(spacing: 0) {
-                    NavBar(title: "Review", backLabel: "Home", onBack: onBack)
+                    NavBar(title: "结果", backLabel: "主页", onBack: onBack)
                     EmptyState(
                         symbol: "photo.badge.exclamationmark",
-                        title: "Nothing to show yet",
-                        message: "This capture isn't ready. Go back and Seamly will tell you where it got to."
+                        title: "暂时没有可看的内容",
+                        message: "这次截图还没准备好。返回主页，Seamly 会告诉你它进行到哪一步了。"
                     )
                     .frame(maxHeight: .infinity)
                 }
@@ -60,14 +60,14 @@ struct ReviewScreen: View {
             subtitle: SeamlyNumber.dimensions(
                 width: Int(capture.pixelSize.width),
                 height: Int(capture.pixelSize.height)
-            ) + " · " + SeamlyNumber.counted(capture.session.keyframes.count, "frame", "frames"),
-            backLabel: layout.isRegular ? "Library" : "",
+            ) + " · " + SeamlyNumber.counted(capture.session.keyframes.count, "帧", "帧"),
+            backLabel: layout.isRegular ? "图库" : "",
             onBack: onBack
         ) {
             if let first = capture.findings.first {
-                IconButton(symbol: "slider.horizontal.3", label: "Repair") { onRepair(first.n) }
+                IconButton(symbol: "slider.horizontal.3", label: "修复") { onRepair(first.n) }
             }
-            IconButton(symbol: "square.and.arrow.up", label: "Export", action: onExport)
+            IconButton(symbol: "square.and.arrow.up", label: "导出", action: onExport)
         }
     }
 
@@ -112,7 +112,7 @@ struct ReviewScreen: View {
                 summary(capture)
                 Spacer(minLength: SeamlySpace.s4)
                 if let first = capture.findings.first {
-                    SeamlyButton("Review them", symbol: "arrow.right") { onRepair(first.n) }
+                    SeamlyButton("去看看", symbol: "arrow.right") { onRepair(first.n) }
                         .accessibilityIdentifier("open-repair")
                 }
             }
@@ -142,13 +142,13 @@ struct ReviewScreen: View {
         let findings = capture.findings
         return VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(findings.isEmpty ? "Nothing to fix" : "\(findings.count) to look at")
+                Text(findings.isEmpty ? "没有需要修的" : "\(findings.count) 处需要看看")
                     .font(SeamlyFont.title3)
                     .foregroundStyle(SeamlyColor.ink)
                     .seamlyDisplayTracking()
                 Text(findings.isEmpty
-                     ? "Every seam matched confidently."
-                     : "Select one to jump there.")
+                     ? "每一处拼接都对齐得很好。"
+                     : "点一条可以跳到那个位置。")
                     .font(SeamlyFont.footnote)
                     .foregroundStyle(SeamlyColor.inkMuted)
                     .fixedSize(horizontal: false, vertical: true)
@@ -169,12 +169,12 @@ struct ReviewScreen: View {
             .frame(maxHeight: .infinity)
 
             HStack(spacing: SeamlySpace.s4) {
-                SeamlyButton("Repair", variant: .outline) {
+                SeamlyButton("修复", variant: .outline) {
                     findings.first.map { onRepair($0.n) }
                 }
                 .disabled(findings.isEmpty)
                 .frame(maxWidth: .infinity)
-                SeamlyButton("Export", symbol: "square.and.arrow.up", action: onExport)
+                SeamlyButton("导出", symbol: "square.and.arrow.up", action: onExport)
                     .frame(maxWidth: .infinity)
             }
             .padding(SeamlySpace.s5)
@@ -194,7 +194,7 @@ struct ReviewScreen: View {
         HStack(spacing: SeamlySpace.s3) {
             if flagged > 0 { StatusNote(kind: .flagged, count: flagged) }
             if gaps > 0 { StatusNote(kind: .gap, count: gaps) }
-            if findings.isEmpty { StatusNote(kind: .ready, label: "Every seam matched confidently") }
+            if findings.isEmpty { StatusNote(kind: .ready, label: "每一处拼接都对齐得很好") }
         }
     }
 }
@@ -223,7 +223,7 @@ private struct FindingLine: View {
             // exactly the inconsistency the thin-space rule exists to prevent.
             parts.append("dy \(dy > 0 ? "+" : "")" + SeamlyNumber.px(dy))
         } else if finding.kind == .gap {
-            parts.append("never revealed")
+            parts.append("没有截到")
         }
         if let confidence = finding.confidence {
             parts.append("conf \(String(format: "%.2f", confidence))")

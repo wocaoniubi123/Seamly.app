@@ -32,12 +32,16 @@ extension Capture {
         CaptureMarks.all(in: session, placement: placement, findings: findings)
     }
 
-    /// "Today" / "Yesterday" / "16 August" — a capture is named by when it was made.
+    /// "今天" / "昨天" / "8月16日" — a capture is named by when it was made.
+    ///
+    /// The long form is left to the system locale rather than hard-coded: the two words that need
+    /// saying are the relative ones, and a fixed `"8月16日"` pattern would be wrong in any
+    /// language the app is eventually localized into.
     var title: String {
         let calendar = Calendar.current
         let date = session.createdAt
-        if calendar.isDateInToday(date) { return "Today" }
-        if calendar.isDateInYesterday(date) { return "Yesterday" }
+        if calendar.isDateInToday(date) { return "今天" }
+        if calendar.isDateInYesterday(date) { return "昨天" }
         return date.formatted(.dateTime.day().month(.wide))
     }
 }

@@ -15,14 +15,14 @@ struct FirstRunView: View {
 
     private let steps = [
         Step(symbol: "record.circle",
-             title: "Tap Record, pick Seamly",
-             message: "Seamly records your screen while you scroll another app. Pick Seamly in the sheet and wait for the countdown."),
+             title: "点录制，选 Seamly",
+             message: "你在别的应用里滑动时，Seamly 会录制屏幕。在弹窗里选 Seamly，然后等倒计时结束。"),
         Step(symbol: "hand.draw",
-             title: "A buzz means slow down",
-             message: "Switch to the app you want and scroll at a steady pace. If you feel a buzz you are outrunning the frame rate — ease up, or scroll back a little."),
+             title: "震一下就是滑太快了",
+             message: "切到你要截的应用，匀速往下滑。如果感觉震了一下，说明你滑得比帧率还快——放慢一点，或者往回滑一点。"),
         Step(symbol: "checkmark.seal",
-             title: "Stop and come back",
-             message: "Stop from the red indicator, then return. Your capture is waiting, already stitched, with anything uncertain marked."),
+             title: "停止录制，回到 Seamly",
+             message: "点红色指示条停止录制，然后回到 Seamly。长图已经拼好在那里，有不确定的地方都标出来了。"),
     ]
 
     private var isLast: Bool { page == steps.count - 1 }
@@ -46,7 +46,7 @@ struct FirstRunView: View {
                             message: steps[page].message
                         )
                         if page == 1 {
-                            Text("Seamly cannot show you anything while it records — a banner would be captured along with everything else. The buzz is the only signal it can send.")
+                            Text("录制期间 Seamly 没法在屏幕上显示任何东西——任何横幅都会被一起录进去。震动是它唯一能给你的提示。")
                                 .font(SeamlyFont.footnote)
                                 .foregroundStyle(SeamlyColor.inkMuted)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -61,7 +61,7 @@ struct FirstRunView: View {
 
             PageDots(count: steps.count, index: page)
 
-            SeamlyButton(isLast ? "Get Started" : "Next", size: .large) {
+            SeamlyButton(isLast ? "开始使用" : "下一步", size: .large) {
                 if isLast { onDone() } else { withAnimation(SeamlyMotion.base) { page += 1 } }
             }
             .frame(maxWidth: SeamlySpace.columnMax)

@@ -205,8 +205,8 @@ struct CaptureView: View {
             .allowsHitTesting(false)
         }
         .clipped()
-        .accessibilityLabel("Stitched capture")
-        .accessibilityHint("Scroll to move through the capture. Pinch to zoom in.")
+        .accessibilityLabel("拼接好的长图")
+        .accessibilityHint("滑动可以浏览整张图，双指捏合可以放大。")
         .accessibilityIdentifier("capture-sheet")
     }
 
@@ -265,8 +265,8 @@ struct CaptureView: View {
         // drill into the two raw halves separately from the label describing the join as a whole.
         .accessibilityElement(children: .ignore)
         .accessibilityIdentifier("repair-canvas")
-        .accessibilityLabel("The two halves of this join")
-        .accessibilityHint("Drag up or down to line them up. Pinch to zoom in.")
+        .accessibilityLabel("这一处拼接的两半")
+        .accessibilityHint("上下拖动把它们对齐，双指捏合可以放大。")
     }
 
     private func joinWindow(_ image: CGImage, width: CGFloat, offsetY: CGFloat, size: CGSize) -> some View {
@@ -383,15 +383,15 @@ struct CaptureView: View {
         captureSize: CGSize(width: width, height: height),
         marks: [
             CaptureMark(id: "a", kind: .flagged, atPct: 0.15, n: 1, lostLabel: nil),
-            CaptureMark(id: "b", kind: .gap, atPct: 0.5, n: 2, lostLabel: "lost lock"),
+            CaptureMark(id: "b", kind: .gap, atPct: 0.5, n: 2, lostLabel: "丢失跟焦"),
             CaptureMark(id: "c", kind: .confident, atPct: 0.72, n: nil, lostLabel: nil),
         ],
         findings: [
             Finding(id: "a", n: 1, kind: .seam, atPct: 0.15, target: .join(0),
-                    title: "Seam after frame 1", question: "Does this line up?",
+                    title: "第 1 帧后面的拼接处", question: "这两半对得上吗？",
                     detail: "", dy: 100, confidence: 0.3),
             Finding(id: "b", n: 2, kind: .gap, atPct: 0.5, target: .gap(afterKeyframeIndex: 1),
-                    title: "Gap after frame 2", question: "Nothing was captured here",
+                    title: "第 2 帧后面有缺口", question: "这一小段没有截到",
                     detail: "", dy: nil, confidence: nil),
         ],
         selected: 1,

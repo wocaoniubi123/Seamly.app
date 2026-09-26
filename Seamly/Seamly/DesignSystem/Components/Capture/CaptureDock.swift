@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 /// Return-home IA: the capture affordance is PERMANENTLY present, never a toolbar icon.
 /// Docked at the bottom, in thumb reach, with the two import paths flanking it so the hero is
@@ -8,6 +9,11 @@ import SwiftUI
 /// `RPSystemBroadcastPickerView` has no SwiftUI equivalent and is the project's one sanctioned
 /// UIKit exception. It draws a fixed **black** glyph in both appearances and does not adapt, so
 /// the accent slab behind it carries the contrast on its own, exactly as `HomeView`'s disc did.
+///
+/// **The two side buttons open their picker directly.** They used to push an `ImportSheet` whose
+/// only content was a second tappable row, so reaching the photo library cost two taps and a
+/// modal for one decision. `PhotosPicker` opens the library by making *its label* the button, so
+/// the picker now lives inside the side button itself (`ImportTrigger`) and the sheet is gone.
 ///
 /// Width is capped: a 1024 pt-wide capture button on iPad is absurd.
 ///
@@ -19,12 +25,20 @@ import SwiftUI
 struct CaptureDock: View {
     var liveCapture: LiveCaptureAvailability = .available
     var recording: Bool = false
-    let onVideo: () -> Void
-    let onPhotos: () -> Void
+    /// The state the pickers write into. Owned by `AppShell`, because the same selection drives
+    /// the import in whichever screen the dock happens to be on.
+    @Binding var videoSelection: PhotosPickerItem?
+    @Binding var photoSelection: [PhotosPickerItem]
 
     var body: some View {
         HStack(spacing: SeamlySpace.s4) {
-            side(symbol: "film", label: "From a screen recording", action: onVideo)
+            ImportTrigger(
+                source: .video,
+                videoSelection: $videoSelection,
+                photoSelection: $photoSelection,
+                symbol: "film",
+                label: "导入录屏"
+            )
             if let explanation = liveCapture.explanation {
                 Text(explanation)
                     .font(SeamlyFont.footnote)
@@ -37,7 +51,13 @@ struct CaptureDock: View {
             } else {
                 recordSlab
             }
-            side(symbol: "photo.on.rectangle", label: "From screenshots", action: onPhotos)
+            ImportTrigger(
+                source: .photos,
+                videoSelection: $videoSelection,
+                photoSelection: $photoSelection,
+                symbol: "photo.on.rectangle",
+                label: "导入截图"
+            )
         }
         .frame(maxWidth: SeamlySpace.columnMax)
         .frame(maxWidth: .infinity)
@@ -64,37 +84,19 @@ struct CaptureDock: View {
             // auto-tap it is the fragility we refuse.
             BroadcastPickerButton()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .accessibilityLabel(recording ? "Recording" : "Record")
+                .accessibilityLabel(recording ? "录制中" : "录制")
                 .accessibilityIdentifier("record-button")
             RoundedRectangle(cornerRadius: SeamlyRadius.sm, style: .continuous)
                 .fill(recording ? SeamlyColor.markRec : SeamlyColor.accent)
                 .allowsHitTesting(false)
             HStack(spacing: SeamlySpace.s3) {
                 Image(systemName: "record.circle").font(.system(size: 20, weight: .light))
-                Text(recording ? "Recording" : "Record").font(SeamlyFont.headline)
+                Text(recording ? "录制中" : "录制").font(SeamlyFont.headline)
             }
             .foregroundStyle(SeamlyColor.inkInverse)
             .allowsHitTesting(false)
         }
         .frame(height: 52)
         .frame(maxWidth: .infinity)
-    }
-
-    private func side(symbol: String, label: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Image(systemName: symbol)
-                .font(.system(size: 20))
-                .foregroundStyle(SeamlyColor.ink)
-                .frame(width: 52, height: 52)
-                .background(SeamlyColor.paperRaised)
-                .overlay {
-                    RoundedRectangle(cornerRadius: SeamlyRadius.sm, style: .continuous)
-                        .strokeBorder(SeamlyColor.rule, lineWidth: 1)
-                }
-                .seamlyCorners(SeamlyRadius.sm)
-                .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(label)
     }
 }

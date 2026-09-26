@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 import StitchKit
 
 /// RETURN HOME. The app is backgrounded while the user scrolls another app, so the most common
@@ -17,8 +18,10 @@ struct HomeScreen: View {
     var onReview: (UUID) -> Void
     var onRepair: (UUID, Int) -> Void
     var onHelp: () -> Void
-    var onVideo: () -> Void
-    var onPhotos: () -> Void
+    /// The dock's two pickers write these, and `AppShell` runs the import off them. Bound
+    /// through from the shell so the pickers can be the dock's buttons themselves.
+    @Binding var videoSelection: PhotosPickerItem?
+    @Binding var photoSelection: [PhotosPickerItem]
 
     @Environment(\.horizontalSizeClass) private var hSize
     @Environment(\.verticalSizeClass) private var vSize
@@ -33,20 +36,24 @@ struct HomeScreen: View {
                 stage(capture)
                 statusRow(capture)
             } else {
-                NavBar(title: "Seamly", subtitle: "Capture beyond the screen", large: true) {
-                    IconButton(symbol: "questionmark.circle", label: "How it works", action: onHelp)
+                NavBar(title: "Seamly", subtitle: "跳出屏幕去截图", large: true) {
+                    IconButton(symbol: "questionmark.circle", label: "怎么用", action: onHelp)
                 }
                 Spacer(minLength: 0)
                 EmptyState(
                     symbol: "plus.viewfinder",
-                    title: "Nothing captured yet",
-                    message: "Record your screen while you scroll another app, and Seamly stitches everything you reveal into one image."
+                    title: "还没有截过图",
+                    message: "你在别的应用里滑动时打开录制，Seamly 会把你滑过的内容拼成一整张图。"
                 )
                 Spacer(minLength: 0)
             }
-            CaptureDock(liveCapture: liveCapture, onVideo: onVideo, onPhotos: onPhotos)
-                .padding(.horizontal, layout.gutter)
-                .padding(.top, SeamlySpace.s5)
+            CaptureDock(
+                liveCapture: liveCapture,
+                videoSelection: $videoSelection,
+                photoSelection: $photoSelection
+            )
+            .padding(.horizontal, layout.gutter)
+            .padding(.top, SeamlySpace.s5)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(SeamlyColor.paper)
@@ -57,8 +64,8 @@ struct HomeScreen: View {
     @ViewBuilder
     private func header(_ capture: Capture) -> some View {
         NavBar(title: "Seamly") {
-            IconButton(symbol: "list.bullet", label: "Library", action: onLibrary)
-            IconButton(symbol: "questionmark.circle", label: "How it works", action: onHelp)
+            IconButton(symbol: "list.bullet", label: "图库", action: onLibrary)
+            IconButton(symbol: "questionmark.circle", label: "怎么用", action: onHelp)
         }
         HStack(alignment: .firstTextBaseline, spacing: SeamlySpace.s4) {
             Text(capture.title)
@@ -101,12 +108,12 @@ struct HomeScreen: View {
                     // Stored, resolved, but the proxy is gone — deleted out from under us.
                     EmptyState(
                         symbol: "photo.badge.exclamationmark",
-                        title: "Capture removed",
-                        message: "This capture is no longer on the device."
+                        title: "截图已删除",
+                        message: "这次截图在本机已经找不到了。"
                     )
                 }
             case .processing:
-                ProgressNote(label: "Stitching…", value: model.importProgress)
+                ProgressNote(label: "正在拼接…", value: model.importProgress)
                     .frame(maxWidth: SeamlySpace.columnMax)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             case .failed(let message):
@@ -148,7 +155,7 @@ struct HomeScreen: View {
                 if flagged > 0 { StatusNote(kind: .flagged, count: flagged) }
                 if gaps > 0 { StatusNote(kind: .gap, count: gaps) }
                 if capture.phase == .ready, findings.isEmpty {
-                    StatusNote(kind: .ready, label: "Every seam matched confidently")
+                    StatusNote(kind: .ready, label: "每一处拼接都对齐得很好")
                 }
             }
         }
@@ -156,7 +163,7 @@ struct HomeScreen: View {
         @ViewBuilder var action: some View {
             if capture.phase == .ready, capture.proxy != nil {
                 SeamlyButton(
-                    findings.isEmpty ? "Open" : "Review them",
+                    findings.isEmpty ? "打开" : "去看看",
                     variant: .plain,
                     symbol: findings.isEmpty ? nil : "arrow.right"
                 ) {

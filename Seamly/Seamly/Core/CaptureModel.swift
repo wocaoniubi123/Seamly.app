@@ -166,6 +166,13 @@ final class CaptureModel {
         importError = nil
     }
 
+    /// Surface an import failure the flow caught BEFORE the model was involved — a picked file
+    /// that would not decode, or fewer than two screenshots chosen. Same channel as a model-side
+    /// failure so there is exactly one place an import error reaches the screen.
+    func setImportError(_ message: String) {
+        importError = message
+    }
+
     func consumePendingResult() {
         pendingResult = nil
     }
@@ -431,7 +438,7 @@ final class CaptureModel {
         case notFound
         var errorDescription: String? {
             switch self {
-            case .notFound: "That capture is no longer available."
+            case .notFound: "这次截图在本机已经找不到了。"
             }
         }
     }

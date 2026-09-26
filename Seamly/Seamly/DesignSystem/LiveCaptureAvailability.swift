@@ -46,9 +46,9 @@ nonisolated enum LiveCaptureAvailability: Equatable {
         case .available:
             nil
         case .unavailableOnMac:
-            "Live capture needs an iPhone or iPad. Import a screen recording or screenshots instead."
+            "实时录制需要 iPhone 或 iPad。可以改用导入录屏或导入截图。"
         case .recorderUnavailable:
-            "Screen recording isn't available right now. Import a screen recording or screenshots instead."
+            "现在用不了屏幕录制。可以改用导入录屏或导入截图。"
         }
     }
 }

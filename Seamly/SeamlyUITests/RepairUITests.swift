@@ -107,15 +107,15 @@ final class RepairUITests: XCTestCase {
         XCTAssertTrue(scrollUntilHittable(marker, on: sheet))
         marker.tap()
 
-        XCTAssertTrue(app.staticTexts["1 of 1"].waitForExistence(timeout: 20),
+        XCTAssertTrue(app.staticTexts["第 1 处 / 共 1 处"].waitForExistence(timeout: 20),
                       "the queue never showed its position")
         XCTAssertTrue(app.buttons["queue-accept"].isHittable,
                       "the affirmative answer must be the wide, primary one")
-        XCTAssertFalse(app.buttons["Increase Offset"].exists,
+        XCTAssertFalse(app.buttons["增大偏移量"].exists,
                        "the steppers are the advanced path, not the default")
 
-        app.buttons["Adjust manually"].tap()
-        XCTAssertTrue(app.buttons["Increase Offset"].waitForExistence(timeout: 5))
+        app.buttons["手动微调"].tap()
+        XCTAssertTrue(app.buttons["增大偏移量"].waitForExistence(timeout: 5))
     }
 
     /// Drags `sheet` upward until `marker` is hittable, or gives up after `maxSwipes`.
@@ -148,11 +148,11 @@ final class RepairUITests: XCTestCase {
     }
 
     /// Same conditional dance as `SeamlyUITests`: onboarding shows only on a fresh install, and its
-    /// button reads "Next" until the last page.
+    /// button reads "下一步" until the last page.
     @MainActor
     private func dismissOnboardingIfPresented(_ app: XCUIApplication) {
-        let next = app.buttons["Next"]
-        let getStarted = app.buttons["Get Started"]
+        let next = app.buttons["下一步"]
+        let getStarted = app.buttons["开始使用"]
         guard next.waitForExistence(timeout: 5) || getStarted.exists else { return }
         while next.exists { next.tap() }
         XCTAssertTrue(getStarted.waitForExistence(timeout: 5), "onboarding never offered a way out")

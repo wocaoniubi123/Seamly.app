@@ -17,7 +17,7 @@ struct QueuePrompt<Manual: View>: View {
     var detail: String?
     /// The offset under the finger, shown in mono so it does not reflow as it steps.
     var value: Int?
-    var affirmative: String = "Looks right"
+    var affirmative: String = "没问题"
     var onNudge: ((Int) -> Void)?
     let onAccept: () -> Void
     let onSkipAll: () -> Void
@@ -25,9 +25,9 @@ struct QueuePrompt<Manual: View>: View {
 
     private var kindWord: String {
         switch kind {
-        case .gap: "Gap"
-        case .bars: "Bars uncertain"
-        case .seam: "Uncertain seam"
+        case .gap: "缺口"
+        case .bars: "栏范围待定"
+        case .seam: "拼接处待确认"
         }
     }
 
@@ -38,12 +38,12 @@ struct QueuePrompt<Manual: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: SeamlySpace.s5) {
             HStack(alignment: .firstTextBaseline) {
-                Text(kindWord.uppercased())
+                Text(kindWord)
                     .font(SeamlyFont.caps)
                     .seamlyCapsTracking()
                     .foregroundStyle(kindColor)
                 Spacer()
-                Text("\(index) of \(total)")
+                Text("第 \(index) 处 / 共 \(total) 处")
                     .font(SeamlyFont.mono)
                     .monospacedDigit()
                     .foregroundStyle(SeamlyColor.inkFaint)
@@ -66,13 +66,13 @@ struct QueuePrompt<Manual: View>: View {
 
             HStack(spacing: SeamlySpace.s3) {
                 if let onNudge {
-                    nudge(symbol: "chevron.up", label: "Nudge up") { onNudge(-1) }
+                    nudge(symbol: "chevron.up", label: "上移一像素") { onNudge(-1) }
                 }
                 SeamlyButton(affirmative, size: .large, action: onAccept)
                     .frame(maxWidth: .infinity)
                     .accessibilityIdentifier("queue-accept")
                 if let onNudge {
-                    nudge(symbol: "chevron.down", label: "Nudge down") { onNudge(1) }
+                    nudge(symbol: "chevron.down", label: "下移一像素") { onNudge(1) }
                 }
             }
             // MINIMUM. A fixed height here silently undid `SeamlyButton`'s own `minHeight` +
@@ -93,7 +93,7 @@ struct QueuePrompt<Manual: View>: View {
                         .foregroundStyle(SeamlyColor.inkMuted)
                 }
                 Spacer()
-                Button("Skip all", action: onSkipAll)
+                Button("全部跳过", action: onSkipAll)
                     .font(SeamlyFont.footnote)
                     .foregroundStyle(SeamlyColor.inkMuted)
                     .buttonStyle(.plain)
@@ -131,7 +131,7 @@ struct QueuePrompt<Manual: View>: View {
 
 extension QueuePrompt where Manual == EmptyView {
     init(index: Int, total: Int, kind: Finding.Kind, question: String, detail: String? = nil,
-         value: Int? = nil, affirmative: String = "Looks right",
+         value: Int? = nil, affirmative: String = "没问题",
          onNudge: ((Int) -> Void)? = nil,
          onAccept: @escaping () -> Void, onSkipAll: @escaping () -> Void) {
         self.init(index: index, total: total, kind: kind, question: question, detail: detail,

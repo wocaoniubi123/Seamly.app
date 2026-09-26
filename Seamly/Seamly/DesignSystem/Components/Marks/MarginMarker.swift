@@ -46,7 +46,7 @@ struct MarginMarker: View {
         }
         .buttonStyle(.plain)
         .animation(SeamlyMotion.press, value: selected)
-        .accessibilityLabel("Mark \(n)")
+        .accessibilityLabel("第 \(n) 处")
         .accessibilityIdentifier("margin-marker-\(n)")
     }
 }

@@ -33,10 +33,10 @@ struct StepperRow: View {
                 .foregroundStyle(SeamlyColor.inkMuted)
                 .frame(minWidth: 68, alignment: .trailing)
             HStack(spacing: 0) {
-                stepButton("minus", label: "Decrease \(label)") { set(-1) }
+                stepButton("minus", label: "减小\(label)") { set(-1) }
                     .disabled(value <= range.lowerBound)
                 Rectangle().fill(SeamlyColor.rule).frame(width: 1)
-                stepButton("plus", label: "Increase \(label)") { set(1) }
+                stepButton("plus", label: "增大\(label)") { set(1) }
                     .disabled(value >= range.upperBound)
             }
             .frame(height: 34)

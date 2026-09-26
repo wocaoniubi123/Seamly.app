@@ -135,13 +135,13 @@ nonisolated enum CaptureCondition: Equatable {
     /// Here rather than in the view for the reason the whole type exists: "there is no walkable
     /// seam pair in this session" is a pipeline fact, and this is the only place one becomes
     /// English.
-    static let nothingToLineUpMessage = "There's nothing here to line up."
+    static let nothingToLineUpMessage = "这里没有可以对齐的地方。"
 
     /// The manifest does not describe the join being opened — a keyframe missing either side of it,
     /// or no seam recorded for the pair (`JoinAlignment.init?` returning `nil`). Distinct from
     /// `nothingToLineUpMessage`: there *is* a join at this position, but what was saved about it is
     /// incomplete, so nothing can be placed on screen honestly.
-    static let joinNotDescribedMessage = "This part of the capture is missing, so there's nothing to line up."
+    static let joinNotDescribedMessage = "这一段没有保存下来，所以没有东西可以对齐。"
 }
 
 nonisolated extension CaptureCondition {
@@ -159,23 +159,23 @@ nonisolated extension CaptureCondition {
     static func message(for error: Error) -> String {
         switch error {
         case Compositor.CompositorError.noKeyframes, BatchStitcher.StitchError.empty:
-            "There was nothing saved to put together."
+            "没有保存下可供拼接的内容。"
         case Compositor.CompositorError.contextFailure:
-            "There wasn't enough memory to build an image this long."
+            "内存不足，拼不出一张这么长的图。"
         case KeyframeIO.IOError.decodeFailed:
-            "Some of the saved screens couldn't be read back."
+            "有一部分保存下来的画面读不回来了。"
         case KeyframeIO.IOError.encodeFailed:
-            "The screens couldn't be saved to this device."
+            "这些画面没法保存到本机。"
         case KeyframeIO.IOError.sizeMismatch:
-            "A saved screen isn't the size it was recorded at."
+            "有一张保存的画面尺寸和录制时不一致。"
         case VideoKeyframeSource.VideoError.noVideoTrack:
-            "That file doesn't have any video in it."
+            "这个文件里没有视频轨道。"
         case VideoKeyframeSource.VideoError.readFailed:
-            "That video couldn't be read."
+            "这个视频读不出来。"
         case MediaImporter.ImportError.notEnoughContent:
-            "There wasn't enough here to join together."
+            "内容太少，没有可以拼到一起的部分。"
         case is KeyframeChromeValidationError:
-            "What was saved about this capture doesn't add up, so it can't be rebuilt."
+            "这次录制保存的数据对不上，没法重建。"
         default:
             unrecognizedMessage(for: error)
         }
@@ -194,7 +194,7 @@ nonisolated extension CaptureCondition {
         // The placeholder interpolates the domain — which for a bridged Swift error is the
         // type's own name — so a description containing its own domain carries no real message.
         guard !described.isEmpty, !described.contains(bridged.domain) else {
-            return "Something went wrong and this couldn't be finished."
+            return "出了点问题，这一步没能完成。"
         }
         return described
     }
@@ -208,8 +208,8 @@ nonisolated private extension Imperfection {
             guard facts.isIncomplete else { return nil }
             self.init(
                 kind: kind,
-                headline: "The recording ended early",
-                detail: "This is everything that was saved before it stopped.",
+                headline: "录制提前结束了",
+                detail: "这是停止之前保存下来的全部内容。",
                 severity: .warning,
                 recommendsRecordingAgain: true,
                 canBeLinedUp: false
@@ -219,8 +219,8 @@ nonisolated private extension Imperfection {
             guard facts.segmentBreaks > 0 else { return nil }
             self.init(
                 kind: kind,
-                headline: "Joined from \(facts.segmentBreaks + 1) pieces",
-                detail: "You scrolled too fast in places, so this couldn't be made continuous.",
+                headline: "由 \(facts.segmentBreaks + 1) 段拼成",
+                detail: "有几处滑得太快，没能接成连续的一张。",
                 severity: .warning,
                 recommendsRecordingAgain: true,
                 canBeLinedUp: false
@@ -230,9 +230,8 @@ nonisolated private extension Imperfection {
             guard facts.unresolvedChrome > 0 else { return nil }
             self.init(
                 kind: kind,
-                headline: "Some bars may repeat",
-                detail: "Couldn't tell which parts were the app's own bars on "
-                    + Self.count(facts.unresolvedChrome, "screen", "screens") + ".",
+                headline: "顶栏/底栏可能重复",
+                detail: "有 \(facts.unresolvedChrome) 屏分不清哪些是应用自己的栏。",
                 severity: .guidance,
                 recommendsRecordingAgain: false,
                 canBeLinedUp: true
@@ -242,8 +241,8 @@ nonisolated private extension Imperfection {
             guard facts.flaggedSeams > 0 else { return nil }
             self.init(
                 kind: kind,
-                headline: "A join may not line up",
-                detail: Self.count(facts.flaggedSeams, "join", "joins") + " might be slightly off.",
+                headline: "有一处拼接可能没对齐",
+                detail: "有 \(facts.flaggedSeams) 处可能偏了一点。",
                 severity: .guidance,
                 recommendsRecordingAgain: false,
                 canBeLinedUp: true
@@ -253,8 +252,8 @@ nonisolated private extension Imperfection {
             guard facts.orderAssumed else { return nil }
             self.init(
                 kind: kind,
-                headline: "Kept in the order they were taken",
-                detail: "These couldn't be put in order by their content, so the original order was used.",
+                headline: "按拍摄顺序排列",
+                detail: "没法靠画面内容判断先后，所以沿用了原来的顺序。",
                 severity: .guidance,
                 recommendsRecordingAgain: false,
                 canBeLinedUp: false
@@ -262,7 +261,8 @@ nonisolated private extension Imperfection {
         }
     }
 
-    static func count(_ n: Int, _ singular: String, _ plural: String) -> String {
-        "\(n) \(n == 1 ? singular : plural)"
+    /// 中文不需要单复数一致，`plural` 只为保持调用点签名不变而保留。
+    static func count(_ n: Int, _ unit: String, _: String) -> String {
+        "\(n)\(unit)"
     }
 }

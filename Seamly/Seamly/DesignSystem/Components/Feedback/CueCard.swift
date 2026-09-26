@@ -21,7 +21,7 @@ struct CueCard: View {
                 // Both of these wrap. Without `fixedSize` they are single-line and truncate
                 // mid-word at accessibility sizes — "BEFORE YO…", "Tap Reco…" — which is the
                 // one thing a card that exists to TEACH something must never do.
-                Text((when == .before ? "Before you start" : "What that buzz meant").uppercased())
+                Text(when == .before ? "开始之前" : "刚那下震动是什么意思")
                     .font(SeamlyFont.caps)
                     .seamlyCapsTracking()
                     .foregroundStyle(SeamlyColor.inkFaint)
