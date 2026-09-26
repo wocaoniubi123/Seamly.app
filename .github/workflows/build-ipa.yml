@@ -1,0 +1,70 @@
+name: Build unsigned IPA
+
+on:
+  push:
+    branches: [ main, ci-build-ipa ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Report toolchain
+        run: |
+          sw_vers
+          ls /Applications | grep -i xcode || true
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i ios || true
+
+      - name: Select newest Xcode 26 if present
+        run: |
+          set -euo pipefail
+          PICK=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1 || true)
+          if [ -z "$PICK" ]; then PICK=/Applications/Xcode.app; fi
+          echo "Using $PICK"
+          sudo xcode-select --switch "$PICK"
+          xcodebuild -version
+
+      - name: Build (no code signing)
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project Seamly/Seamly.xcodeproj \
+            -scheme Seamly \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/dd" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            build
+
+      - name: Package unsigned IPA
+        run: |
+          set -euo pipefail
+          APP=$(find "$RUNNER_TEMP/dd/Build/Products/Release-iphoneos" -maxdepth 1 -name 'Seamly.app' | head -1)
+          test -n "$APP"
+          echo "App bundle: $APP"
+          mkdir -p "$RUNNER_TEMP/ipa/Payload"
+          cp -R "$APP" "$RUNNER_TEMP/ipa/Payload/"
+          ( cd "$RUNNER_TEMP/ipa" && /usr/bin/zip -qry Seamly-unsigned.ipa Payload )
+          echo "--- Payload contents ---"
+          find "$RUNNER_TEMP/ipa/Payload" -maxdepth 3 -name '*.appex' -o -maxdepth 1 -name '*.app'
+          ls -lh "$RUNNER_TEMP/ipa/Seamly-unsigned.ipa"
+          mkdir -p "$GITHUB_WORKSPACE/out"
+          cp "$RUNNER_TEMP/ipa/Seamly-unsigned.ipa" "$GITHUB_WORKSPACE/out/"
+          shasum -a 256 "$GITHUB_WORKSPACE/out/Seamly-unsigned.ipa" > "$GITHUB_WORKSPACE/out/SHA256.txt"
+          cat "$GITHUB_WORKSPACE/out/SHA256.txt"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Seamly-unsigned-ipa
+          path: out/
+          if-no-files-found: error
+          retention-days: 30
